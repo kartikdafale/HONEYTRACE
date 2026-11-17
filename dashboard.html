@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>HoneyTrace Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<style>
+  body{ font-family: system-ui, sans-serif; background:#0c1322; color:#f1f1f1; margin:0; padding:24px; }
+  h1{ margin-top:0; }
+  .cards{ display:flex; gap:16px; margin-bottom:24px; flex-wrap:wrap; }
+  .card{ background:#16233d; border:1px solid #283c63; border-radius:8px; padding:16px 20px; min-width:160px; }
+  .card .num{ font-size:1.8rem; font-weight:600; color:#4fd0c0; }
+  .card .lbl{ font-size:0.85rem; color:#9fabc4; }
+  .charts{ display:flex; gap:24px; flex-wrap:wrap; margin-bottom:24px; }
+  .chart-box{ background:#16233d; border:1px solid #283c63; border-radius:8px; padding:16px; flex:1; min-width:320px; }
+  table{ width:100%; border-collapse:collapse; background:#16233d; border:1px solid #283c63; border-radius:8px; overflow:hidden; }
+  th,td{ padding:8px 10px; border-bottom:1px solid #283c63; font-size:0.85rem; text-align:left; }
+  th{ color:#9fabc4; }
+  .tag{ padding:2px 8px; border-radius:99px; font-size:0.75rem; }
+  .low{ background:rgba(43,179,163,.2); color:#4fd0c0; }
+  .medium{ background:rgba(231,182,90,.2); color:#e7b65a; }
+  .high{ background:rgba(217,100,79,.2); color:#d9644f; }
+</style>
+</head>
+<body>
+  <h1>HoneyTrace Dashboard</h1>
+
+  <div class="cards">
+    <div class="card"><div class="num" id="totalEvents">-</div><div class="lbl">Total events</div></div>
+    <div class="card"><div class="num" id="uniqueIps">-</div><div class="lbl">Unique IPs</div></div>
+  </div>
+
+  <div class="charts">
+    <div class="chart-box"><canvas id="riskPie"></canvas></div>
+    <div class="chart-box"><canvas id="typeBar"></canvas></div>
+    <div class="chart-box" style="flex-basis:100%;"><canvas id="dayLine"></canvas></div>
+  </div>
+
+  <h2>Recent activity</h2>
+  <table>
+    <thead>
+      <tr><th>Time</th><th>IP</th><th>Activity</th><th>Username tried</th><th>Risk</th><th>Details</th></tr>
+    </thead>
+    <tbody id="recentBody"></tbody>
+  </table>
+
+<script>
+async function loadDashboard() {
+  const stats = await fetch("/api/stats").then(r => r.json());
+  const recent = await fetch("/api/recent?limit=25").then(r => r.json());
+
+  document.getElementById("totalEvents").textContent = stats.totals.totalEvents;
+  document.getElementById("uniqueIps").textContent = stats.totals.uniqueIps;
+
+  new Chart(document.getElementById("riskPie"), {
+    type: "pie",
+    data: {
+      labels: stats.byRisk.map(r => r.risk_level),
+      datasets: [{
+        data: stats.byRisk.map(r => r.count),
+        backgroundColor: ["#4fd0c0", "#e7b65a", "#d9644f"]
+      }]
+    },
+    options: { plugins: { title: { display: true, text: "Events by risk level", color: "#f1f1f1" }, legend: { labels: { color: "#f1f1f1" } } } }
+  });
+
+  new Chart(document.getElementById("typeBar"), {
+    type: "bar",
+    data: {
+      labels: stats.byType.map(r => r.activity_type),
+      datasets: [{ label: "Count", data: stats.byType.map(r => r.count), backgroundColor: "#2bb3a3" }]
+    },
+    options: {
+      plugins: { title: { display: true, text: "Events by activity type", color: "#f1f1f1" }, legend: { display: false } },
+      scales: { x: { ticks: { color: "#f1f1f1" } }, y: { ticks: { color: "#f1f1f1" } } }
+    }
+  });
+
+  new Chart(document.getElementById("dayLine"), {
+    type: "line",
+    data: {
+      labels: stats.byDay.map(r => r.day),
+      datasets: [{ label: "Events per day", data: stats.byDay.map(r => r.count), borderColor: "#4fd0c0", tension: 0.3 }]
+    },
+    options: {
+      plugins: { title: { display: true, text: "Activity over last 14 days", color: "#f1f1f1" } },
+      scales: { x: { ticks: { color: "#f1f1f1" } }, y: { ticks: { color: "#f1f1f1" } } }
+    }
+  });
+
+  const body = document.getElementById("recentBody");
+  body.innerHTML = recent.map(ev => `
+    <tr>
+      <td>${new Date(ev.created_at).toLocaleString()}</td>
+      <td>${ev.ip_address}</td>
+      <td>${ev.activity_type}</td>
+      <td>${ev.username_tried || "-"}</td>
+      <td><span class="tag ${ev.risk_level}">${ev.risk_level}</span></td>
+      <td>${ev.details || "-"}</td>
+    </tr>
+  `).join("");
+}
+
+loadDashboard();
+setInterval(loadDashboard, 15000); // refresh every 15s
+</script>
+</body>
+</html>

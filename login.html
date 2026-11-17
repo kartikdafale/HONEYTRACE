@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Xccenture | Employee Portal</title>
+<style>
+  :root{
+    --navy-950:#0c1322;
+    --navy-900:#101a2e;
+    --navy-800:#162442;
+    --navy-700:#203256;
+    --teal-500:#2bb3a3;
+    --teal-400:#4fd0c0;
+    --amber-400:#e7b65a;
+    --paper-50:#f6f5f1;
+    --paper-100:#eceae3;
+    --ink-900:#14181f;
+    --ink-500:#5b6472;
+    --danger:#d9644f;
+    --border:#283c63;
+    color-scheme: dark;
+  }
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="dark"]){
+      --surface: var(--paper-50);
+    }
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;margin:0;}
+  body{
+    font-family: "Segoe UI", Roboto, -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--navy-950);
+    color: var(--paper-50);
+    min-height:100%;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .wordmark{
+    font-family: Georgia, "Times New Roman", serif;
+    letter-spacing: -0.01em;
+  }
+  .wordmark .x{ color: var(--teal-400); }
+
+  /* ---------- LOGIN VIEW ---------- */
+  #login-view{
+    min-height: 100vh;
+    display:grid;
+    grid-template-columns: 1.1fr 1fr;
+  }
+  @media (max-width: 760px){
+    #login-view{ grid-template-columns: 1fr; }
+    .brand-panel{ min-height: 240px; }
+  }
+  .brand-panel{
+    background:
+      radial-gradient(circle at 20% 15%, rgba(79,208,192,0.18), transparent 45%),
+      linear-gradient(160deg, var(--navy-900), var(--navy-950));
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    padding: 48px 56px;
+    border-right: 1px solid var(--border);
+  }
+  .brand-panel h1{
+    font-size: clamp(2.4rem, 5vw, 3.6rem);
+    line-height: 1.05;
+    margin: 0 0 18px 0;
+  }
+  .brand-panel p{
+    max-width: 38ch;
+    color: #b7c2d6;
+    font-size: 1.05rem;
+    line-height: 1.5;
+  }
+  .brand-foot{
+    font-size: 0.85rem;
+    color: #7183a0;
+  }
+  .form-panel{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding: 40px 24px;
+    background: var(--navy-900);
+  }
+  .login-card{
+    width: 100%;
+    max-width: 380px;
+  }
+  .login-card h2{
+    margin: 0 0 6px 0;
+    font-size: 1.5rem;
+  }
+  .login-card .sub{
+    color:#8d9ab3;
+    margin: 0 0 28px 0;
+    font-size: 0.95rem;
+  }
+  label{
+    display:block;
+    font-size: 0.82rem;
+    color:#9fabc4;
+    margin: 18px 0 6px;
+  }
+  input[type="text"], input[type="password"]{
+    width:100%;
+    padding: 12px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--navy-800);
+    color: var(--paper-50);
+    font-size: 0.98rem;
+    outline: none;
+  }
+  input:focus-visible, button:focus-visible{
+    outline: 2px solid var(--teal-400);
+    outline-offset: 2px;
+  }
+  .error-msg{
+    color: var(--danger);
+    font-size: 0.85rem;
+    margin-top: 14px;
+    min-height: 1.2em;
+  }
+  .btn-primary{
+    margin-top: 24px;
+    width:100%;
+    padding: 12px 14px;
+    border: none;
+    border-radius: 6px;
+    background: var(--teal-500);
+    color: #06201b;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor:pointer;
+  }
+  .btn-primary:hover{ background: var(--teal-400); }
+  .hint{
+    margin-top: 18px;
+    font-size: 0.78rem;
+    color: #67738c;
+    border-top: 1px dashed var(--border);
+    padding-top: 14px;
+  }
+
+  /* ---------- DASHBOARD VIEW ---------- */
+  #dash-view{ display:none; min-height:100vh; background: var(--navy-950); }
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 16px 28px;
+    border-bottom: 1px solid var(--border);
+    background: var(--navy-900);
+    position: sticky; top: 0;
+    padding-top: calc(16px + env(safe-area-inset-top, 0px));
+  }
+  .topbar .wordmark{ font-size: 1.3rem; }
+  .logout-btn{
+    background: none;
+    border: 1px solid var(--border);
+    color: #b7c2d6;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.88rem;
+  }
+  .logout-btn:hover{ border-color: var(--teal-400); color: var(--teal-400); }
+
+  .dash-body{ max-width: 1040px; margin: 0 auto; padding: 32px 24px 64px; }
+  .greet{ font-size: 1.6rem; margin: 0 0 4px; }
+  .greet-sub{ color: #8d9ab3; margin: 0 0 28px; }
+
+  .stat-row{
+    display:grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+  @media (max-width: 700px){ .stat-row{ grid-template-columns: repeat(2,1fr);} }
+  .stat-card{
+    background: var(--navy-800);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 18px;
+  }
+  .stat-card .num{ font-size: 1.7rem; font-weight: 600; color: var(--teal-400); }
+  .stat-card .lbl{ font-size: 0.82rem; color:#8d9ab3; margin-top: 4px; }
+
+  .panel{
+    background: var(--navy-800);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 22px 24px;
+    margin-bottom: 20px;
+  }
+  .panel h3{ margin: 0 0 16px; font-size: 1.05rem; }
+  .kv-grid{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 24px;
+    font-size: 0.92rem;
+  }
+  @media (max-width: 560px){ .kv-grid{ grid-template-columns: 1fr; } }
+  .kv-grid .k{ color:#8d9ab3; }
+  .kv-grid .v{ color: var(--paper-50); }
+  .kv-row{ display:flex; justify-content:space-between; border-bottom: 1px solid var(--navy-700); padding: 7px 0; }
+
+  table{ width:100%; border-collapse: collapse; font-size: 0.9rem; }
+  th{ text-align:left; color:#8d9ab3; font-weight: 500; padding: 8px 10px; border-bottom: 1px solid var(--border); }
+  td{ padding: 10px; border-bottom: 1px solid var(--navy-700); }
+  .tag{ padding: 3px 9px; border-radius: 99px; font-size: 0.76rem; }
+  .tag.ok{ background: rgba(43,179,163,0.18); color: var(--teal-400); }
+  .tag.pending{ background: rgba(231,182,90,0.18); color: var(--amber-400); }
+  .tag.conf{ background: rgba(217,100,79,0.18); color: var(--danger); }
+
+  .panel-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+  .panel-head h3{ margin:0; }
+  .classified{
+    font-size: 0.72rem;
+    letter-spacing: 0.03em;
+    color: var(--danger);
+    border: 1px solid rgba(217,100,79,0.4);
+    padding: 3px 9px;
+    border-radius: 4px;
+  }
+  .proj-grid{ display:grid; grid-template-columns: repeat(2,1fr); gap: 14px; }
+  @media (max-width: 700px){ .proj-grid{ grid-template-columns: 1fr; } }
+  .proj-card{ background: var(--navy-700); border: 1px solid var(--border); border-radius: 7px; padding: 16px; }
+  .proj-card .pname{ font-weight: 600; margin-bottom: 6px; }
+  .proj-card .prow{ display:flex; justify-content:space-between; font-size: 0.85rem; color:#aab6cc; padding: 3px 0; }
+  .proj-card .prow span:last-child{ color: var(--paper-50); }
+  .proj-note{ margin-top: 12px; font-size: 0.78rem; color: #7183a0; border-top: 1px dashed var(--border); padding-top: 10px; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-view">
+  <div class="brand-panel">
+    <div>
+      <h1 class="wordmark"><span class="x">X</span>ccenture</h1>
+      <p>Internal employee portal. Sign in with your company credentials to view your profile, leave balance and payslips.</p>
+    </div>
+    <div class="brand-foot">Xccenture Global Services &middot; Employee Intranet</div>
+  </div>
+  <div class="form-panel">
+    <div class="login-card">
+      <h2>Sign in</h2>
+      <p class="sub">Access your employee dashboard.</p>
+      <form id="login-form" autocomplete="off">
+        <label for="uname">Username</label>
+        <input type="text" id="uname" placeholder="e.g. kartikdafale121" />
+        <label for="pword">Password</label>
+        <input type="password" id="pword" placeholder="Enter password" />
+        <div class="error-msg" id="err"></div>
+        <button type="submit" class="btn-primary">Sign in</button>
+      </form>
+      <div class="hint">Demo portal with one sample account — this is a mock project, not a real company system.</div>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dash-view">
+  <div class="topbar">
+    <div class="wordmark"><span class="x">X</span>ccenture</div>
+    <button class="logout-btn" id="logout">Sign out</button>
+  </div>
+  <div class="dash-body">
+    <h2 class="greet">Welcome back, Kartik</h2>
+    <p class="greet-sub">Employee ID XCN-20417 &middot; Software Engineer II &middot; Pune Delivery Center</p>
+
+    <div class="stat-row">
+      <div class="stat-card"><div class="num">14</div><div class="lbl">Leave days left</div></div>
+      <div class="stat-card"><div class="num">96%</div><div class="lbl">Attendance (FY)</div></div>
+      <div class="stat-card"><div class="num">3</div><div class="lbl">Active projects</div></div>
+      <div class="stat-card"><div class="num">₹92,400</div><div class="lbl">Last payslip (net)</div></div>
+    </div>
+
+    <div class="panel">
+      <h3>Employee profile</h3>
+      <div class="kv-grid">
+        <div class="kv-row"><span class="k">Full name</span><span class="v">Kartik Dafale</span></div>
+        <div class="kv-row"><span class="k">Employee ID</span><span class="v">XCN-20417</span></div>
+        <div class="kv-row"><span class="k">Designation</span><span class="v">Software Engineer II</span></div>
+        <div class="kv-row"><span class="k">Department</span><span class="v">Cloud &amp; Platform Engineering</span></div>
+        <div class="kv-row"><span class="k">Reporting manager</span><span class="v">Priya Sharma</span></div>
+        <div class="kv-row"><span class="k">Date of joining</span><span class="v">11 Mar 2023</span></div>
+        <div class="kv-row"><span class="k">Work location</span><span class="v">Pune Delivery Center</span></div>
+        <div class="kv-row"><span class="k">Employment type</span><span class="v">Full-time</span></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Recent payslips</h3>
+      <table>
+        <thead><tr><th>Month</th><th>Gross</th><th>Deductions</th><th>Net pay</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>Oct 2026</td><td>₹1,08,000</td><td>₹15,600</td><td>₹92,400</td><td><span class="tag ok">Paid</span></td></tr>
+          <tr><td>Sep 2026</td><td>₹1,08,000</td><td>₹15,600</td><td>₹92,400</td><td><span class="tag ok">Paid</span></td></tr>
+          <tr><td>Aug 2026</td><td>₹1,05,000</td><td>₹14,900</td><td>₹90,100</td><td><span class="tag ok">Paid</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h3>Active project engagements</h3>
+        <span class="classified">Internal use only</span>
+      </div>
+      <div class="proj-grid">
+        <div class="proj-card">
+          <div class="pname">Project Meridian</div>
+          <div class="prow"><span>Client</span><span>Northbridge Retail Group</span></div>
+          <div class="prow"><span>Scope</span><span>Core banking migration, phase 2</span></div>
+          <div class="prow"><span>Contract value</span><span>$4.2M</span></div>
+          <div class="prow"><span>Go-live</span><span>Mar 2027</span></div>
+          <div class="prow"><span>Access level</span><span>Restricted &mdash; NDA</span></div>
+        </div>
+        <div class="proj-card">
+          <div class="pname">Project Halcyon</div>
+          <div class="prow"><span>Client</span><span>Vantic Health Systems</span></div>
+          <div class="prow"><span>Scope</span><span>Patient records cloud migration</span></div>
+          <div class="prow"><span>Contract value</span><span>$2.8M</span></div>
+          <div class="prow"><span>Go-live</span><span>Jun 2027</span></div>
+          <div class="prow"><span>Access level</span><span>Restricted &mdash; PII handling</span></div>
+        </div>
+        <div class="proj-card">
+          <div class="pname">Project Lumen</div>
+          <div class="prow"><span>Client</span><span>Starfield Energy Corp</span></div>
+          <div class="prow"><span>Scope</span><span>Internal fraud-detection pipeline</span></div>
+          <div class="prow"><span>Contract value</span><span>$1.1M</span></div>
+          <div class="prow"><span>Go-live</span><span>Jan 2027</span></div>
+          <div class="prow"><span>Access level</span><span>Confidential</span></div>
+        </div>
+      </div>
+      <div class="proj-note">All client names, figures and systems on this screen are invented for this demo &mdash; no real client, contract or infrastructure detail is represented.</div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h3>Team directory</h3>
+      </div>
+      <table>
+        <thead><tr><th>Name</th><th>Employee ID</th><th>Role</th><th>Department</th></tr></thead>
+        <tbody>
+          <tr><td>Priya Sharma</td><td>XCN-10022</td><td>Engineering Manager</td><td>Cloud &amp; Platform Engineering</td></tr>
+          <tr><td>Rohan Mehta</td><td>XCN-20301</td><td>Senior Software Engineer</td><td>Cloud &amp; Platform Engineering</td></tr>
+          <tr><td>Anjali Rao</td><td>XCN-20455</td><td>QA Engineer</td><td>Cloud &amp; Platform Engineering</td></tr>
+          <tr><td>Kartik Dafale</td><td>XCN-20417</td><td>Software Engineer II</td><td>Cloud &amp; Platform Engineering</td></tr>
+        </tbody>
+      </table>
+      <div class="proj-note">Fictional colleague list for demo purposes only.</div>
+    </div>
+
+    <div class="panel">
+      <h3>Leave requests</h3>
+      <table>
+        <thead><tr><th>Type</th><th>From</th><th>To</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>Earned leave</td><td>02 Dec 2026</td><td>04 Dec 2026</td><td><span class="tag pending">Pending</span></td></tr>
+          <tr><td>Sick leave</td><td>14 Oct 2026</td><td>14 Oct 2026</td><td><span class="tag ok">Approved</span></td></tr>
+          <tr><td>Earned leave</td><td>20 Aug 2026</td><td>23 Aug 2026</td><td><span class="tag ok">Approved</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+  var VALID_USER = "kartikdafale121";
+  var VALID_PASS = "K@rtik999";
+
+  var form = document.getElementById("login-form");
+  var err = document.getElementById("err");
+  var loginView = document.getElementById("login-view");
+  var dashView = document.getElementById("dash-view");
+
+  form.addEventListener("submit", function(e){
+    e.preventDefault();
+    var u = document.getElementById("uname").value.trim();
+    var p = document.getElementById("pword").value;
+    if(u === VALID_USER && p === VALID_PASS){
+      err.textContent = "";
+      loginView.style.display = "none";
+      dashView.style.display = "block";
+    } else {
+      err.textContent = "Incorrect username or password.";
+    }
+  });
+
+  document.getElementById("logout").addEventListener("click", function(){
+    dashView.style.display = "none";
+    loginView.style.display = "grid";
+    document.getElementById("pword").value = "";
+    err.textContent = "";
+  });
+</script>
+</body>
+</html>
